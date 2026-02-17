@@ -1,3 +1,4 @@
+// @ts-nocheck
 // TypeScript sample with vulnerabilities
 import express, { Request, Response } from 'express';
 import { Pool } from 'pg';
