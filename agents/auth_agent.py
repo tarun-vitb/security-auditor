@@ -23,6 +23,12 @@ AUTH_PATTERNS = [
     r'@(UseGuards|AuthGuard)',
 ]
 
+# File-level auth middleware patterns (protects ALL routes in the file)
+FILE_LEVEL_AUTH_PATTERNS = [
+    r'router\.use\s*\(\s*(authenticate|authMiddleware|protect)',
+    r'app\.use\s*\(\s*(authenticate|authMiddleware|protect)',
+]
+
 # Sensitive operations that should require auth
 SENSITIVE_OPS = [
     r'(?i)(delete|remove|drop|update|create|insert|modify|admin|user|password|payment|checkout)',
@@ -35,6 +41,15 @@ def detect_missing_auth(files: List[Dict]) -> List[Dict]:
     
     for file_info in files:
         content = file_info['content']
+        
+        # Check for file-level auth middleware (e.g. router.use(authenticate))
+        file_has_auth = any(
+            re.search(pat, content, re.IGNORECASE)
+            for pat in FILE_LEVEL_AUTH_PATTERNS
+        )
+        if file_has_auth:
+            continue  # All routes in this file are authenticated
+        
         lines = content.split('\n')
         
         for i, line in enumerate(lines):
