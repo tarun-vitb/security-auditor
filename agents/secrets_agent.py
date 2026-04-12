@@ -14,12 +14,9 @@ SECRET_PATTERNS = [
     (r'ghp_[a-zA-Z0-9]{36}', 'GitHub Personal Access Token'),
     (r'sk-[a-zA-Z0-9]{48}', 'OpenAI API Key'),
 ]
-
-
 def detect_secrets(files: List[Dict]) -> List[Dict]:
     """Scan files for hardcoded secrets."""
     findings = []
-    
     for file_info in files:
         content = file_info['content']
         lines = content.split('\n')
