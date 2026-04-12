@@ -67,6 +67,8 @@ body {
 input::placeholder { color: #414753; }
 `
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8001';
+
 const SCAN_STEPS = [
   { id: 1, label: 'Cloning repository', icon: '📦' },
   { id: 2, label: 'Secrets Agent', icon: '🔑' },
@@ -125,7 +127,7 @@ function App() {
     setLoading(true); setError(null); setResults(null); setScanSteps([])
     setFixCache({}); setFixAllCache({}); setExpandedCards({})
     try {
-      const response = await axios.post('http://localhost:8001/analyze', { repo_url: repoUrl })
+      const response = await axios.post(`${API_BASE_URL}/analyze`, { repo_url: repoUrl })
       setResults(response.data)
     } catch (err) {
       setError(err.response?.data?.error || err.response?.data?.detail || err.message || 'An error occurred')
@@ -137,7 +139,7 @@ function App() {
     if (fixCache[k]?.code) return
     setFixCache(p => ({ ...p, [k]: { code: null, loading: true, error: null } }))
     try {
-      const r = await axios.post('http://localhost:8001/generate-fix', { vulnerability_type: vulnType, code_snippet: codeSnippet })
+      const r = await axios.post(`${API_BASE_URL}/generate-fix`, { vulnerability_type: vulnType, code_snippet: codeSnippet })
       setFixCache(p => ({ ...p, [k]: { code: r.data.fixed_code, loading: false, error: null } }))
     } catch (err) {
       setFixCache(p => ({ ...p, [k]: { code: null, loading: false, error: err.response?.data?.error || 'Failed' } }))
@@ -153,7 +155,7 @@ function App() {
       code_snippet: f.code_snippet || f.matched || ''
     }))
     try {
-      const r = await axios.post('http://localhost:8001/fix-all', { filename, vulnerabilities })
+      const r = await axios.post(`${API_BASE_URL}/fix-all`, { filename, vulnerabilities })
       setFixAllCache(p => ({ ...p, [filename]: { code: r.data.fixed_file, loading: false, error: null } }))
     } catch (err) {
       setFixAllCache(p => ({ ...p, [filename]: { code: null, loading: false, error: err.response?.data?.error || 'Failed' } }))
